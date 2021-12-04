@@ -23,19 +23,19 @@ GOBIN ?= $(GOPATH)/bin
 DOCKER_CLI_EXPERIMENTAL = enabled
 export GOPATH GOBIN GO111MODULE DOCKER_CLI_EXPERIMENTAL
 
-include release-tools/build.make
+#include release-tools/build.make
 
 GIT_COMMIT = $(shell git rev-parse HEAD)
 BUILD_DATE = $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
-IMAGE_VERSION = v3.0.0
+IMAGE_VERSION ?= v3.0.0
 LDFLAGS = -X ${PKG}/pkg/nfs.driverVersion=${IMAGE_VERSION} -X ${PKG}/pkg/nfs.gitCommit=${GIT_COMMIT} -X ${PKG}/pkg/nfs.buildDate=${BUILD_DATE}
 EXT_LDFLAGS = -s -w -extldflags "-static"
 # Use a custom version for E2E tests if we are testing in CI
-ifdef CI
-ifndef PUBLISH
-override IMAGE_VERSION := e2e-$(GIT_COMMIT)
-endif
-endif
+#ifdef CI
+#ifndef PUBLISH
+#override IMAGE_VERSION := e2e-$(GIT_COMMIT)
+#endif
+#endif
 IMAGENAME ?= nfsplugin
 REGISTRY ?= andyzhangx
 REGISTRY_NAME ?= $(shell echo $(REGISTRY) | sed "s/.azurecr.io//g")
@@ -128,7 +128,7 @@ container:
 	$(MAKE) container-linux-armv7
 
 .PHONY: push
-push:
+push: container
 ifdef CI
 	docker manifest create --amend $(IMAGE_TAG) $(foreach osarch, $(ALL_OS_ARCH), $(IMAGE_TAG)-${osarch})
 	docker manifest push --purge $(IMAGE_TAG)

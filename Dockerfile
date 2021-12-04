@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM k8s.gcr.io/build-image/debian-base:buster-v1.6.0
+FROM k8s.gcr.io/build-image/debian-base:bullseye-v1.0.0
 
 # Architecture for bin folder
 ARG ARCH
@@ -22,6 +22,7 @@ COPY bin/${ARCH}/nfsplugin /nfsplugin
 
 # this is a workaround to install nfs-common & nfs-kernel-server and don't quit with error
 # https://github.com/kubernetes-sigs/blob-csi-driver/issues/214#issuecomment-781602430
-RUN apt update && apt install ca-certificates mount nfs-common nfs-kernel-server -y || true
+RUN apt update && apt upgrade -y && apt-mark unhold libcap2
+RUN apt install ca-certificates mount libssl1.1 nfs-common nfs-kernel-server -y
 
 ENTRYPOINT ["/nfsplugin"]
